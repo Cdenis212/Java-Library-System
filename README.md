@@ -1,0 +1,6 @@
+- The following is a Library mangement System
+- This Library Management System contains 4 total classes
+- This System uses 3 Array List's to store all releveant data
+- The Library system allows Books, and Borrowers to be added and removed
+- The Library system allows Books to be borrowed and returned
+- The status of the books are also updated as the books are being borrowed and returned
