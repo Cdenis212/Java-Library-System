@@ -1,12 +1,23 @@
 import java.util.*;
 import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.FileReader;
+
+
 class Library{
 	private ArrayList<Book> books = new ArrayList<>();
 	private ArrayList<Borrower> borrowers = new ArrayList<>();
 	private Scanner sc = new Scanner(System.in);
-	
+	private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	
 	public void start(){
+		
+		System.out.println("Loading books from file");
+		loadBookFromFile("books.csv");
+		loadBorrower("Borrower.csv");
 		
 		
 		boolean exit = false;
@@ -25,18 +36,17 @@ class Library{
 		System.out.println("8. Display all borrowers");
 		System.out.println("9. Exit");
 		System.out.println("----------------------------------------------");
-		System.out.println("Enter your choice: " );
+		// System.out.println("Enter your choice: " );
 		System.out.println();
 		
+		int choice = getValidInput("Enter your choice: " );
 		
-		if(sc.hasNextInt()){
-		int choice = sc.nextInt();
-		sc.nextLine();
 		switch(choice){
 			case 1: addBook();
 			break;
 			
 			case 2: removeBook();
+			
 			
 			break;
 			case 3: searchBook();
@@ -57,18 +67,95 @@ class Library{
 			case 8: displayAllBorrowers();
 			break;
 			
-			case 9: System.out.println("Exiting the application"); 
-			return;
-			default: System.out.println("invalid choice");
+			case 9:  System.out.println("Exiting the application"); 
+			System.exit(0);
 			
+			default: System.out.println("Invalid choice");
 			}
-		}else{
-			System.out.println("Please enter an integer value 1-9! ");
-			return;
-			}
-		
 		}// end of loop
 	}// end of method
+	public void loadBorrower(String filename){
+		try(BufferedReader fileReader = new BufferedReader(new FileReader(filename))){
+			String line;
+			fileReader.readLine();
+			while((line = fileReader.readLine()) !=null){
+				String[] data = line.split(",");
+				if(data.length >= 3){
+					String name = data[0].trim();
+					String memberId = data[1].trim();
+				Borrower bw = new Borrower(name, memberId);
+				borrowers.add(bw); 
+				String[] borrowedBooks = data[2].split(";");
+					for(String ISBN: borrowedBooks){
+						Book book = findBook(ISBN);
+						if(book != null){
+							bw.borrowBook(book);
+						}else{
+							System.out.println("No book found" + ISBN);
+						}
+					}
+					
+				
+					
+				}
+			}
+			System.out.println("Loaded " + borrowers.size() + " borrowers from file.");
+
+			
+		}catch(IOException e){
+			System.out.println("Error reading file");
+		}
+	}
+	
+	public void loadBookFromFile(String filename){
+		try(BufferedReader fileReader = new BufferedReader(new FileReader(filename))){
+			String line;
+			fileReader.readLine();
+			while((line = fileReader.readLine()) != null){
+				String[] data = line.split(",");
+				
+				if(data.length == 4){
+					String title = data[0].trim();
+					String author = data[1].trim();
+					String ISBN = data[2].trim();
+					boolean isAvailable = Boolean.parseBoolean(data[3].trim());
+					
+					books.add(new Book(title, author, ISBN, isAvailable));
+					
+				}else{
+					System.out.println("Skipping invalid line: " + line);
+				}
+			} // end of while loop
+			System.out.println("Books loaded successfully from file. ");
+		}catch(FileNotFoundException e){
+			System.out.println("Error: The file '" + filename +"' was not found.");
+		}catch(IOException e){
+			System.out.println("Error reading the file: " + e.getMessage());
+		}
+			
+		
+	}// end of method
+	
+	
+	private int getValidInput(String prompt){
+	int number = -1;
+	boolean valid = false;
+	
+	while(!valid){
+		try{
+			System.out.print(prompt);
+			String input = br.readLine();
+			number = Integer.parseInt(input);
+			valid = true;
+		}catch(IOException e){
+			System.out.println("An error occurred while reading input. Please try again.");
+		}catch(NumberFormatException e){
+			System.out.println("Invalid input. Please enter an integer.");
+		}
+	}
+	return number;	
+		
+	}
 	
 	private void addBook(){
 		System.out.println("Enter book title: ");
@@ -77,7 +164,7 @@ class Library{
 		String author = sc.nextLine();
 		System.out.println("Enter the ISBN: ");
 		String ISBN = sc.nextLine();
-		books.add(new Book(title, author, ISBN));
+		books.add(new Book(title, author, ISBN, true));
 		System.out.println("Book added successfully!");
 		System.out.println();
 	}
@@ -149,7 +236,7 @@ class Library{
 		Book book = findBook(ISBN);
 		
 		if(borrower != null && book != null){
-		borrower.borrowedBook(book);
+		borrower.borrowBook(book);
 		}else{
 			System.out.println("Either the book or the borrower is invalid");
 		}
