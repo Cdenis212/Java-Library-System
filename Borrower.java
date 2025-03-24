@@ -4,17 +4,17 @@ import java.util.ArrayList;
 class Borrower{
 	private String name;
 	private String memberId;
-	private List<Book> borrowedBooks;
+	private List<Book> borrowBooks;
 	
 	public Borrower(String name, String memberId){
 		this.name = name;
 		this.memberId = memberId;
-		this.borrowedBooks = new ArrayList<>();
+		this.borrowBooks = new ArrayList<>();
 	}
 	
-	public void borrowedBook(Book book){
+	public void borrowBook(Book book){
 		if(book.isAvailable()){
-		borrowedBooks.add(book);
+		borrowBooks.add(book);
 		book.setAvailable(false);
 		System.out.println("Book borrowed successfully by " + name);
 		}else{
@@ -23,8 +23,8 @@ class Borrower{
 	}
 	
 	public void returnBook(Book book){
-		if(borrowedBooks.contains(book)){
-			borrowedBooks.remove(book);
+		if(borrowBooks.contains(book)){
+			borrowBooks.remove(book);
 			book.setAvailable(true);
 			System.out.println("This book has been returned by " + name);
 			
